@@ -3,6 +3,7 @@ package com.moonbeam.slidy.web.rest;
 import com.moonbeam.slidy.SlidyApp;
 import com.moonbeam.slidy.domain.Authority;
 import com.moonbeam.slidy.domain.User;
+import com.moonbeam.slidy.repository.SlideRepository;
 import com.moonbeam.slidy.repository.UserRepository;
 import com.moonbeam.slidy.security.AuthoritiesConstants;
 import com.moonbeam.slidy.service.MailService;
@@ -81,6 +82,10 @@ public class UserResourceIntTest {
     private UserMapper userMapper;
 
     @Autowired
+    private SlideRepository slideRepository;
+
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -99,7 +104,7 @@ public class UserResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        UserResource userResource = new UserResource(userRepository, userService, mailService);
+        UserResource userResource = new UserResource(userRepository, userService, slideRepository, mailService );
         this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

@@ -1,0 +1,98 @@
+<form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+
+    <div class="modal-header">
+        <h4 class="modal-title" id="mySlideLabel">Create or edit a Slide</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                (click)="clear()">&times;</button>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group" [hidden]="!slide.id">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                   [(ngModel)]="slide.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="form-control-label" for="field_name">Name</label>
+            <input type="text" class="form-control" name="name" id="field_name"
+                [(ngModel)]="slide.name" />
+        </div>
+        <!--<div class="form-group">-->
+            <!--<label class="form-control-label" for="field_created_date">Added Date</label>-->
+            <!--<div class="d-flex">-->
+                <!--<input id="field_created_date" type="datetime-local" class="form-control" name="created_date" [(ngModel)]="slide.created_date"-->
+                <!--/>-->
+            <!--</div>-->
+        <!--</div>-->
+        <div class="form-group">
+            <label class="form-control-label" for="field_data">Data</label>
+            <div>
+                <img [src]="'data:' + slide.dataContentType + ';base64,' + slide.data" style="max-height: 100px;" *ngIf="slide.data" alt="slide image"/>
+                <div *ngIf="slide.data" class="form-text text-danger clearfix">
+                    <span class="pull-left">{{slide.dataContentType}}, {{byteSize(slide.data)}}</span>
+                    <button type="button" (click)="clearInputImage('data', 'dataContentType', 'fileImage')" class="btn btn-secondary btn-xs pull-right">
+                        <span class="fa fa-times"></span>
+                    </button>
+                </div>
+                <input type="file" id="file_data" (change)="setFileData($event, slide, 'data', true)" accept="image/*"/>
+            </div>
+            <input type="hidden" class="form-control" name="data" id="field_data"
+                [(ngModel)]="slide.data" />
+            <input type="hidden" class="form-control" name="dataContentType" id="field_dataContentType"
+                [(ngModel)]="slide.dataContentType" />
+        </div>
+        <div class="form-group">
+            <label class="form-control-label" for="field_showStartDate">Show Start Date</label>
+            <div class="d-flex">
+                <input id="field_showStartDate" type="datetime-local" class="form-control" name="showStartDate" [(ngModel)]="slide.showStartDate"
+                />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-control-label" for="field_showEndDate">Show End Date</label>
+            <div class="d-flex">
+                <input id="field_showEndDate" type="datetime-local" class="form-control" name="showEndDate" [(ngModel)]="slide.showEndDate"
+                />
+            </div>
+        </div>
+        <!--<div class="form-group">-->
+            <!--<label class="form-control-label" for="field_duration">Duration</label>-->
+            <!--<input type="number" class="form-control" name="duration" id="field_duration"-->
+                <!--[(ngModel)]="slide.duration" required min="1" max="100000"/>-->
+            <!--<div [hidden]="!(editForm.controls.duration?.dirty && editForm.controls.duration?.invalid)">-->
+                <!--<small class="form-text text-danger"-->
+                   <!--[hidden]="!editForm.controls.duration?.errors?.required">-->
+                   <!--This field is required.-->
+                <!--</small>-->
+                <!--<small class="form-text text-danger"-->
+                    <!--[hidden]="!editForm.controls.duration?.errors?.min">-->
+                    <!--This field should be at least 1.-->
+                <!--</small>-->
+                <!--<small class="form-text text-danger"-->
+                    <!--[hidden]="!editForm.controls.duration?.errors?.max">-->
+                    <!--This field cannot be more than 100000.-->
+                <!--</small>-->
+                <!--<small class="form-text text-danger"-->
+                    <!--[hidden]="!editForm.controls.duration?.errors?.number">-->
+                    <!--This field should be a number.-->
+                <!--</small>-->
+            <!--</div>-->
+        <!--</div>-->
+
+        <!--<div class="form-group">-->
+            <!--<label class="form-control-label" for="field_user">User</label>-->
+            <!--<select class="form-control" id="field_user" name="user" [(ngModel)]="slide.user" >-->
+                <!--<option [ngValue]="null"></option>-->
+                <!--<option [ngValue]="userOption.id === slide.user?.id ? slide.user : userOption" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>-->
+            <!--</select>-->
+        <!--</div>-->
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="clear()">
+            <span class="fa fa-ban"></span>&nbsp;<span>Cancel</span>
+        </button>
+        <button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+            <span class="fa fa-save"></span>&nbsp;<span>Save</span>
+        </button>
+    </div>
+</form>

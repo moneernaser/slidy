@@ -2,7 +2,9 @@ package com.moonbeam.slidy.web.rest;
 
 import com.moonbeam.slidy.config.Constants;
 import com.codahale.metrics.annotation.Timed;
+import com.moonbeam.slidy.domain.Slide;
 import com.moonbeam.slidy.domain.User;
+import com.moonbeam.slidy.repository.SlideRepository;
 import com.moonbeam.slidy.repository.UserRepository;
 import com.moonbeam.slidy.security.AuthoritiesConstants;
 import com.moonbeam.slidy.service.MailService;
@@ -64,13 +66,16 @@ public class UserResource {
 
     private final UserService userService;
 
+    private final SlideRepository slideRepository;
+
     private final MailService mailService;
 
-    public UserResource(UserRepository userRepository, UserService userService, MailService mailService) {
+    public UserResource(UserRepository userRepository, UserService userService, SlideRepository slideRepository, MailService mailService) {
 
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.slideRepository = slideRepository;
     }
 
     /**
@@ -186,5 +191,22 @@ public class UserResource {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
         return ResponseEntity.ok().headers(HeaderUtil.createAlert( "A user is deleted with identifier " + login, login)).build();
+    }
+
+    /**
+     * GET slides of some user.
+     *
+     * @param login the login of the user to delete
+     * @return the ResponseEntity with status 200 (OK)
+     */
+    @GetMapping("/public/slides")
+    @Timed
+    public List<Slide> getSlidesByUser(@RequestParam("user") String login) {
+        log.debug("REST request to get Slides of the User: {}", login);
+        Optional<User> user = userService.getUserWithAuthoritiesByLogin(login);
+        if (user.isPresent()) {
+            return slideRepository.findByUser(user.get());
+        }
+        else return null;
     }
 }

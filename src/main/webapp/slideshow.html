@@ -1,0 +1,162 @@
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+<head>
+    <!--<base href="./" />-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>slidy</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="manifest" href="manifest.webapp" />
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/benbarnett/jQuery-Animate-Enhanced@1.2.0/scripts/src/jquery.animate-enhanced.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/superslides/0.6.2/jquery.superslides.js"></script>
+
+    <!--<script>window.jQuery || document.write('<script src="js/vendor/jquery-3.2.1.min.js"><\/script>')</script>-->
+
+    <script>
+        // this global date is appended to the request to tell the server the last time request was made.
+        // the server then decides if to return resources or (not-modified).
+        // initialized to EPOCH
+        window.lastCheck = new Date(null);
+
+        window.aleadyStarted = false;
+
+        // this tells how many elements are presented, and server decides if to return resources if some slides were
+        // deleted
+        window.totalElements = 0;
+
+        // Read a page's GET URL variables and return them as an associative array.
+        function getUrlVars() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for(var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+
+
+        function fetchUserImages(callback) {
+            var userlogin = getUrlVars()['user'];
+            if (userlogin.indexOf('#') > -1) {
+                userlogin = userlogin.substr(0, userlogin.indexOf('#'));
+            }
+            lastCheckAsIsoString = lastCheck.toISOString();
+            var  url = encodeURI('/slideshow/get?user=' + userlogin + '&lastCheck=' + lastCheckAsIsoString + '&count=' + totalElements);
+            $.get(url, function (data) {
+                console.log(data);
+                callback(data);
+            })
+        }
+
+        /**
+         * creates an img element
+         * @param src
+         * @param alt
+         * @param title
+         * @returns {any}
+         */
+        function img_create(src, alt, title) {
+            // var img = IEWIN ? new Image() : document.createElement('img');
+            var img = $('<img />');
+            img.src = src;
+            if ( alt != null ) img.alt = alt;
+            if ( title != null ) img.title = title;
+            return img;
+        }
+
+        function img_create2(src, dataContentType, alt, title) {
+            var x = document.createElement("IMG");
+            x.setAttribute("src", 'data:' + dataContentType + ';base64,' + src);
+           // x.setAttribute("height", "200");
+           // x.setAttribute("width", "400");
+            x.setAttribute("alt", alt);
+            x.setAttribute("title", title);
+            return x;
+        }
+
+        function startSlides() {
+            $('#slides').superslides({
+                hashchange: true,
+                play: 2000
+            });
+            window.aleadyStarted = true;
+            // $('#slides').on('mouseenter', function () {
+            //     $(this).superslides('stop');
+            //     console.log('Stopped')
+            // });
+            // $('#slides').on('mouseleave', function () {
+            //     $(this).superslides('start');
+            //     console.log('Started')
+            // });
+
+
+        }
+
+        function buildImgElements(data) {
+            if (data && data.length > 0) {
+                console.log(data);
+                window.totalElements = data.length;
+                //$('.slides-container').empty();
+               // $('.slides-container').attr('style', '');
+                //$('#slides').superslides('destroy')
+                data.forEach(function (item) {
+                    // update lastCheck variable if necessary.
+                    lastModifiedDate = new Date(item.lastModifiedDate);
+                    window.lastCheck = lastModifiedDate > window.lastCheck ? lastModifiedDate : window.lastCheck;
+
+                    var img = img_create2(item.data, item.dataContentType, item.name, item.name);
+                    var li = $('<li></li>');
+                    var nameDiv = $('<div class="container"></div>').append(item.name);
+                    li.append(img);
+                    li.append(nameDiv);
+                    $(".slides-container").append(li);
+                });
+                if (!window.aleadyStarted) {
+                    startSlides();
+                } else {
+                    $("#slides").superslides('update');
+                }
+
+            }
+        }
+
+        function refreshContent() {
+            fetchUserImages(buildImgElements);
+        }
+
+        function start() {
+            fetchUserImages(buildImgElements);
+        }
+        $(function() {
+            start();
+            var repeatingTask = window.setInterval(start, 60*1000);
+            console.log(repeatingTask);
+        });
+    </script>
+</head>
+<body>
+
+   <div id="slides">
+       <button id="refreshContent" onclick="refreshContent()">refreshContent</button>
+       <ul class="slides-container">
+           <!--<img src="img/people.jpeg" alt="Cinelli">-->
+           <!--<img src="https://loremflickr.com/320/240"  alt="Surly">-->
+           <!--<img src="https://loremflickr.com/320/240" alt="Cinelli">-->
+           <!--<img src="https://loremflickr.com/320/240" alt="Affinity">-->
+       </ul>
+
+       <nav class="slides-navigation">
+           <a href="#" class="next">Next</a>
+           <a href="#" class="prev">Previous</a>
+       </nav>
+   </div>
+</body>
+</html>
