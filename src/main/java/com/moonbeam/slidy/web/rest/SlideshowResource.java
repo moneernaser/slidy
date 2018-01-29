@@ -50,57 +50,32 @@ public class SlideshowResource {
     }
 
 
-    @GetMapping("/a")
-    @Timed
-    public String redirectToSlideshowPage() {
-        return "redirect:slideshow.html";
-    }
-
-    @GetMapping("/b")
-    public ModelAndView redirectToSlideshowPage(ModelMap model) {
-        model.addAttribute("user", "bobo");
-        return new ModelAndView("redirect:/slideshow.html", model);
-    }
-
-    @GetMapping("/")
-    public RedirectView redirectWithUsingRedirectView(RedirectAttributes attributes) {
-        attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
-        System.out.println(attributes.asMap().get("user"));
-        String username = SecurityUtils.getCurrentUserLogin().orElse((String) attributes.asMap().get("user"));
-        attributes.addAttribute("user", username);
-        return new RedirectView("/slideshow.html");
-    }
 
     @GetMapping("/get")
     public List<Slide> getSlidesForUser(@RequestParam("user") String userlogin,
                                         @RequestParam(value = "lastCheck", required = false) @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) Date lastCheck,
                                         @RequestParam(value = "count", required = false) Integer count) {
         return userRepository.findOneByLogin(userlogin).map(user -> {
-            if (lastCheck != null) {
-                boolean resourceUpdated = slideRepository.existsByLastModifiedDateAfter(lastCheck.toInstant());
-                if (!resourceUpdated) {
-                    // check if some resources were deleted
-                    Long userSlidesCount = slideRepository.countByUser(user);
-                    if (count == null || userSlidesCount.intValue() != count) {
-                        return slideRepository.findByUser(user);
-                    }
-                } else {
-                    return slideRepository.findByUser(user);
-                }
+
+            // if no previous fetch
+            if (lastCheck == null) {
+                return slideRepository.findByUser(user);
             }
-            return slideRepository.findByUser(user);
-        }).orElse(new ArrayList<>());
+
+            // else: check if resources Updated since lastCheck
+            boolean resourceUpdated = slideRepository.existsByLastModifiedDateAfter(lastCheck.toInstant());
+            if (resourceUpdated) {
+                return slideRepository.findByUser(user);
+            }
+
+            // check if some resources were Deleted (by comparing with user-specified count)
+            Long userSlidesCount = slideRepository.countByUser(user);
+            if (count == null || userSlidesCount.intValue() != count) {
+                return slideRepository.findByUser(user);
+            }
+
+            return null;
+        }).orElse(null);
     }
-
-    private String getRandomUser() {
-        return "admin";
-    }
-
-    @RequestMapping("/c")
-    public String someOtherPage(HttpServletRequest request, HttpServletResponse response) {
-        return "redirect:/stam.html";
-    }
-
-
 
 }

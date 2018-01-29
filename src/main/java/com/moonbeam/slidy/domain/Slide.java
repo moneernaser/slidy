@@ -1,6 +1,9 @@
 package com.moonbeam.slidy.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 
 import java.io.Serializable;
@@ -141,6 +144,11 @@ public class Slide extends AbstractAuditingEntity implements Serializable {
             return false;
         }
         return Objects.equals(getId(), slide.getId());
+    }
+    @JsonIgnore(false)
+    @JsonProperty
+    public Instant getLastModifiedDate() {
+        return super.getLastModifiedDate();
     }
 
     @Override

@@ -18,6 +18,13 @@
 
     <!--<script>window.jQuery || document.write('<script src="js/vendor/jquery-3.2.1.min.js"><\/script>')</script>-->
 
+    <style>
+        /*.constrained-container {*/
+            /*max-width: 1000px;*/
+            /*height: 500px;*/
+            /*margin: 0 auto;*/
+        /*}*/
+    </style>
     <script>
         // this global date is appended to the request to tell the server the last time request was made.
         // the server then decides if to return resources or (not-modified).
@@ -29,6 +36,9 @@
         // this tells how many elements are presented, and server decides if to return resources if some slides were
         // deleted
         window.totalElements = 0;
+
+        // The intervals (in milliseconds) on how often to execute the fetch
+        window.SERVER_PING_INTERVAL = 10000;
 
         // Read a page's GET URL variables and return them as an associative array.
         function getUrlVars() {
@@ -56,36 +66,40 @@
             })
         }
 
-        /**
-         * creates an img element
-         * @param src
-         * @param alt
-         * @param title
-         * @returns {any}
-         */
-        function img_create(src, alt, title) {
-            // var img = IEWIN ? new Image() : document.createElement('img');
-            var img = $('<img />');
-            img.src = src;
-            if ( alt != null ) img.alt = alt;
-            if ( title != null ) img.title = title;
-            return img;
-        }
+        // /**
+        //  * creates an img element
+        //  * @param src
+        //  * @param alt
+        //  * @param title
+        //  * @returns {any}
+        //  */
+        // function img_create(src, alt, title) {
+        //     var img = $('<img />');
+        //     img.src = src;
+        //     if ( alt != null ) img.alt = alt;
+        //     if ( title != null ) img.title = title;
+        //     return img;
+        // }
 
-        function img_create2(src, dataContentType, alt, title) {
+        function img_create(item) {
             var x = document.createElement("IMG");
-            x.setAttribute("src", 'data:' + dataContentType + ';base64,' + src);
-           // x.setAttribute("height", "200");
-           // x.setAttribute("width", "400");
-            x.setAttribute("alt", alt);
-            x.setAttribute("title", title);
+            x.setAttribute("src", 'data:' + item.dataContentType + ';base64,' + item.data);
+            x.setAttribute("height", "100%");
+            x.setAttribute("width", "100%");
+            x.setAttribute("id", item.id);
+            x.setAttribute("alt", item.name);
+            x.setAttribute("title", item.title);
+            x.setAttribute("showStartDate", item.showStartDate);
+            x.setAttribute("showEndDate", item.showEndDate);
+            x.classList.add("preserve");
             return x;
         }
 
         function startSlides() {
+
             $('#slides').superslides({
-                hashchange: true,
-                play: 2000
+                hashchange: false,
+                play: 5000
             });
             window.aleadyStarted = true;
             // $('#slides').on('mouseenter', function () {
@@ -100,63 +114,111 @@
 
         }
 
-        function buildImgElements(data) {
+
+        function updateTotalCount(data) {
             if (data && data.length > 0) {
-                console.log(data);
                 window.totalElements = data.length;
-                //$('.slides-container').empty();
-               // $('.slides-container').attr('style', '');
-                //$('#slides').superslides('destroy')
-                data.forEach(function (item) {
-                    // update lastCheck variable if necessary.
-                    lastModifiedDate = new Date(item.lastModifiedDate);
-                    window.lastCheck = lastModifiedDate > window.lastCheck ? lastModifiedDate : window.lastCheck;
-
-                    var img = img_create2(item.data, item.dataContentType, item.name, item.name);
-                    var li = $('<li></li>');
-                    var nameDiv = $('<div class="container"></div>').append(item.name);
-                    li.append(img);
-                    li.append(nameDiv);
-                    $(".slides-container").append(li);
-                });
-                if (!window.aleadyStarted) {
-                    startSlides();
-                } else {
-                    $("#slides").superslides('update');
-                }
-
             }
         }
 
+        function updateLastCheckTimestamp(data) {
+            if (data && data.length > 0) {
+                data.forEach(function (item) {
+                    var lastModifiedDate = new Date(item.lastModifiedDate);
+                    window.lastCheck = lastModifiedDate > window.lastCheck ? lastModifiedDate : window.lastCheck;
+                });
+            }
+        }
+
+        function imgExists(imgElements, id) {
+            return imgElements.some(function(el) {
+                return el.getAttribute("id") === id;
+            });
+        }
+
+        function deleteImagesFromLocalStorage() {
+            var arr = []; // Array to hold the keys
+            for (var i = 0; i < localStorage.length; i++){
+                if (localStorage.key(i).startsWith("img_")) {
+                    arr.push(localStorage.key(i));
+                }
+            }
+            for (i = 0; i < arr.length; i++) {
+                localStorage.removeItem(arr[i]);
+            }
+        }
+        function saveToLocalStorage(imgElements) {
+            if (imgElements && imgElements.length > 0) {
+                // if we received new content, then something changed.
+                // so we need to renew the localStorage.
+                deleteImagesFromLocalStorage();
+                imgElements.forEach(function (img) {
+                    localStorage.setItem("img_" + img.id, JSON.stringify(img));
+                })
+            }
+        }
+
+        function updateView() {
+            $(".slides-container").empty();
+            for (i = 0; i < window.localStorage.length; i++) {
+                key = window.localStorage.key(i);
+                if (key.startsWith("img_")) {
+                    var slideItem = JSON.parse(localStorage.getItem(key));
+                    var startDate = new Date(slideItem.showStartDate);
+                    var endDate = new Date(slideItem.showEndDate);
+                    var now = new Date();
+                    if (startDate < now && now < endDate) {
+                        var li = $('<li></li>');
+                        var imgElement = img_create(slideItem);
+                        var nameDiv = $('<div class="container"></div>').append(slideItem.name);
+                        li.append(imgElement);
+                        li.append(nameDiv);
+                        $(".slides-container").append(li);
+                    } else {
+                        console.warn("image not displaying because of date range: ["+startDate + " - "+ endDate + "]");
+                    }
+                }
+            }
+            if (!window.aleadyStarted) {
+                startSlides();
+            } else {
+                $("#slides").superslides('update');
+            }
+        }
+        function afterFetch(data) {
+            updateTotalCount(data);
+            updateLastCheckTimestamp(data);
+            saveToLocalStorage(data);
+            updateView();
+        }
+
+
+
         function refreshContent() {
-            fetchUserImages(buildImgElements);
+            fetchUserImages(afterFetch);
         }
 
         function start() {
-            fetchUserImages(buildImgElements);
+            fetchUserImages(afterFetch);
         }
         $(function() {
             start();
-            var repeatingTask = window.setInterval(start, 60*1000);
+            var repeatingTask = window.setInterval(start, window.SERVER_PING_INTERVAL);
             console.log(repeatingTask);
         });
     </script>
 </head>
 <body>
 
-   <div id="slides">
-       <button id="refreshContent" onclick="refreshContent()">refreshContent</button>
-       <ul class="slides-container">
-           <!--<img src="img/people.jpeg" alt="Cinelli">-->
-           <!--<img src="https://loremflickr.com/320/240"  alt="Surly">-->
-           <!--<img src="https://loremflickr.com/320/240" alt="Cinelli">-->
-           <!--<img src="https://loremflickr.com/320/240" alt="Affinity">-->
-       </ul>
+        <div id="slides">
+            <!--<button id="refreshContent" onclick="refreshContent()">refreshContent</button>-->
+            <ul class="slides-container"></ul>
 
-       <nav class="slides-navigation">
-           <a href="#" class="next">Next</a>
-           <a href="#" class="prev">Previous</a>
-       </nav>
-   </div>
+            <nav class="slides-navigation">
+                <a href="#" class="next">Next</a>
+                <a href="#" class="prev">Previous</a>
+            </nav>
+        </div>
+
 </body>
 </html>
