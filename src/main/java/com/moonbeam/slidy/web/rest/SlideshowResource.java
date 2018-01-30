@@ -50,6 +50,15 @@ public class SlideshowResource {
     }
 
 
+    @GetMapping("/")
+    public RedirectView redirectToSlideshowPage(RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
+        System.out.println(attributes.asMap().get("user"));
+        String username = SecurityUtils.getCurrentUserLogin().orElse((String) attributes.asMap().get("user"));
+        attributes.addAttribute("user", username);
+        return new RedirectView("/slideshow.html");
+    }
+
 
     @GetMapping("/get")
     public List<Slide> getSlidesForUser(@RequestParam("user") String userlogin,

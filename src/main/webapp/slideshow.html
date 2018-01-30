@@ -41,7 +41,10 @@
         window.totalElements = 0;
 
         // The intervals (in milliseconds) on how often to execute the fetch
-        window.SERVER_PING_INTERVAL = 10000;
+        window.SERVER_PING_INTERVAL = 60000;
+
+        // the number of milliseconds to show the slide
+        window.SLIDE_INTERVAL = 30000;
 
         // Read a page's GET URL variables and return them as an associative array.
         function getUrlVars() {
@@ -83,51 +86,12 @@
             return x;
         }
 
-        function bindControls() {
-
-            $('.start').hide();
-            $('.start').click(function () {
-                $('#slides').superslides('start');
-                $('.stop').show();
-                $('.start').hide();
-                console.log('Started')
-            });
-
-            $('.stop').click(function () {
-                $('#slides').superslides('stop');
-                $('.start').show();
-                $('.stop').hide();
-                console.log('Stopped')
-            });
-
-            // $('.next').click(function () {
-            //     $('#slides').superslides('next');
-            //     console.log('next')
-            // });
-            //
-            // $('.previous').click(function () {
-            //     $('#slides').superslides('prev');
-            //     console.log('previous')
-            // });
-        }
         function startSlides() {
-
-
             $('#slides').superslides({
                 hashchange: false,
-                play: 5000
+                play: window.SLIDE_INTERVAL
             });
             window.aleadyStarted = true;
-            // $('#slides').on('mouseenter', function () {
-            //     $(this).superslides('stop');
-            //     console.log('Stopped')
-            // });
-            // $('#slides').on('mouseleave', function () {
-            //     $(this).superslides('start');
-            //     console.log('Started')
-            // });
-
-
         }
 
 
@@ -144,12 +108,6 @@
                     window.lastCheck = lastModifiedDate > window.lastCheck ? lastModifiedDate : window.lastCheck;
                 });
             }
-        }
-
-        function imgExists(imgElements, id) {
-            return imgElements.some(function(el) {
-                return el.getAttribute("id") === id;
-            });
         }
 
         function deleteImagesFromLocalStorage() {
@@ -208,10 +166,6 @@
                     var endDate = new Date(slideItem.showEndDate);
                     var now = new Date();
                     if (startDate < now && now < endDate) {
-                        // if (!clearedContainer) {
-                        //     $(".slides-container").empty();
-                        //     clearedContainer = true;
-                        // }
                         var li = $('<li></li>');
                         var imgElement = img_create(slideItem);
                         var nameDiv = $('<div class="container"></div>').append(slideItem.name);
@@ -238,13 +192,6 @@
                 rebuildView();
             }
 
-
-
-           // if (!window.aleadyStarted) {
-
-            //} else {
-            //    $("#slides").superslides('update');
-           // }
         }
         function afterFetch(data) {
             updateTotalCount(data);
@@ -254,37 +201,19 @@
         }
 
 
-
-        function refreshContent() {
-            fetchUserImages(afterFetch);
-        }
-
         function start() {
             fetchUserImages(afterFetch);
         }
         $(function() {
-            bindControls();
             start();
-            var repeatingTask = window.setInterval(start, window.SERVER_PING_INTERVAL);
-            console.log(repeatingTask);
+            window.setInterval(start, window.SERVER_PING_INTERVAL);
         });
     </script>
 </head>
 <body>
 
-        <a href="#" class="start">&#9658;</a>
-        <a href="#" class="stop">||</a>
-
         <div id="slides">
-            <!--<button id="refreshContent" onclick="refreshContent()">refreshContent</button>-->
             <ul class="slides-container"></ul>
-
-            <!--<nav class="slides-navigation">-->
-                <!--<a href="#" class="prev">&laquo;</a>-->
-                <!--<a href="#" class="next">&raquo;</a>-->
-            <!--</nav>-->
-
-
         </div>
 
 </body>
