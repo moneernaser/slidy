@@ -96,7 +96,7 @@ public class SlideResource {
     @Timed
     public List<Slide> getAllSlides() {
         log.debug("REST request to get all Slides");
-        return slideRepository.findAll();
+        return slideRepository.findByUserIsCurrentUser();
         }
 
     /**
