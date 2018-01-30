@@ -24,6 +24,9 @@
             /*height: 500px;*/
             /*margin: 0 auto;*/
         /*}*/
+        #slides {
+            z-index: -1
+        }
     </style>
     <script>
         // this global date is appended to the request to tell the server the last time request was made.
@@ -58,28 +61,13 @@
             if (userlogin.indexOf('#') > -1) {
                 userlogin = userlogin.substr(0, userlogin.indexOf('#'));
             }
-            lastCheckAsIsoString = lastCheck.toISOString();
-            var  url = encodeURI('/slideshow/get?user=' + userlogin + '&lastCheck=' + lastCheckAsIsoString + '&count=' + totalElements);
+            var lastCheckAsIsoString = lastCheck.toISOString();
+            var url = encodeURI('/slideshow/get?user=' + userlogin + '&lastCheck=' + lastCheckAsIsoString + '&count=' + totalElements);
             $.get(url, function (data) {
-                console.log(data);
+                console.log(data.length + " slides found");
                 callback(data);
             })
         }
-
-        // /**
-        //  * creates an img element
-        //  * @param src
-        //  * @param alt
-        //  * @param title
-        //  * @returns {any}
-        //  */
-        // function img_create(src, alt, title) {
-        //     var img = $('<img />');
-        //     img.src = src;
-        //     if ( alt != null ) img.alt = alt;
-        //     if ( title != null ) img.title = title;
-        //     return img;
-        // }
 
         function img_create(item) {
             var x = document.createElement("IMG");
@@ -95,7 +83,35 @@
             return x;
         }
 
+        function bindControls() {
+
+            $('.start').hide();
+            $('.start').click(function () {
+                $('#slides').superslides('start');
+                $('.stop').show();
+                $('.start').hide();
+                console.log('Started')
+            });
+
+            $('.stop').click(function () {
+                $('#slides').superslides('stop');
+                $('.start').show();
+                $('.stop').hide();
+                console.log('Stopped')
+            });
+
+            // $('.next').click(function () {
+            //     $('#slides').superslides('next');
+            //     console.log('next')
+            // });
+            //
+            // $('.previous').click(function () {
+            //     $('#slides').superslides('prev');
+            //     console.log('previous')
+            // });
+        }
         function startSlides() {
+
 
             $('#slides').superslides({
                 hashchange: false,
@@ -158,16 +174,44 @@
             }
         }
 
-        function updateView() {
-            $(".slides-container").empty();
-            for (i = 0; i < window.localStorage.length; i++) {
-                key = window.localStorage.key(i);
+
+        function clearContainer() {
+            $("#slides").superslides("destroy");
+            $('.slides-pagination').remove(); // remove pagination
+            $('.slides-control').remove(); // remove html generated for superslides
+            $('#slides').prepend('<div class="slides-container"></div>');
+        }
+
+        function viewContainsInvalidSlides() {
+            var imgs = $(".slides-container img");
+            if (imgs) {
+                imgs.each(function (index) {
+                    var startDate = $(this).attr("showStartDate");
+                    var endDate = $(this).attr("showEndDate");
+                    var now = new Date();
+                    var inRange = now > new Date(startDate) && now < new Date(endDate);
+                    if (!inRange) {
+                        return true;
+                    }
+                })
+            }
+            return false;
+        }
+
+        function rebuildView() {
+            clearContainer();
+            for (var i = 0; i < window.localStorage.length; i++) {
+                var key = window.localStorage.key(i);
                 if (key.startsWith("img_")) {
                     var slideItem = JSON.parse(localStorage.getItem(key));
                     var startDate = new Date(slideItem.showStartDate);
                     var endDate = new Date(slideItem.showEndDate);
                     var now = new Date();
                     if (startDate < now && now < endDate) {
+                        // if (!clearedContainer) {
+                        //     $(".slides-container").empty();
+                        //     clearedContainer = true;
+                        // }
                         var li = $('<li></li>');
                         var imgElement = img_create(slideItem);
                         var nameDiv = $('<div class="container"></div>').append(slideItem.name);
@@ -179,17 +223,34 @@
                     }
                 }
             }
-            if (!window.aleadyStarted) {
-                startSlides();
-            } else {
-                $("#slides").superslides('update');
+            startSlides();
+        }
+
+        function updateView(data) {
+            // if you got new data: force clear and update.
+            //if you got not modified from server: update only if necessary (if slides nned to show/hide based on dates)
+            var notModified = !(data && data.length > 0);
+            if (notModified) {
+                if (viewContainsInvalidSlides()) {
+                    rebuildView();
+                }
+            } else { // data modified, so need to rebuild view...
+                rebuildView();
             }
+
+
+
+           // if (!window.aleadyStarted) {
+
+            //} else {
+            //    $("#slides").superslides('update');
+           // }
         }
         function afterFetch(data) {
             updateTotalCount(data);
             updateLastCheckTimestamp(data);
             saveToLocalStorage(data);
-            updateView();
+            updateView(data);
         }
 
 
@@ -202,6 +263,7 @@
             fetchUserImages(afterFetch);
         }
         $(function() {
+            bindControls();
             start();
             var repeatingTask = window.setInterval(start, window.SERVER_PING_INTERVAL);
             console.log(repeatingTask);
@@ -210,14 +272,19 @@
 </head>
 <body>
 
+        <a href="#" class="start">&#9658;</a>
+        <a href="#" class="stop">||</a>
+
         <div id="slides">
             <!--<button id="refreshContent" onclick="refreshContent()">refreshContent</button>-->
             <ul class="slides-container"></ul>
 
-            <nav class="slides-navigation">
-                <a href="#" class="next">Next</a>
-                <a href="#" class="prev">Previous</a>
-            </nav>
+            <!--<nav class="slides-navigation">-->
+                <!--<a href="#" class="prev">&laquo;</a>-->
+                <!--<a href="#" class="next">&raquo;</a>-->
+            <!--</nav>-->
+
+
         </div>
 
 </body>
