@@ -59,6 +59,7 @@
         }
 
 
+
         function fetchUserImages(callback) {
             var userlogin = getUrlVars()['user'];
             if (userlogin.indexOf('#') > -1) {
@@ -74,7 +75,6 @@
 
         function img_create(item) {
             var x = document.createElement("IMG");
-           // x.setAttribute("src", 'data:' + item.dataContentType + ';base64,' + item.data);
             x.setAttribute("src", item.url);
             x.setAttribute("height", "100%");
             x.setAttribute("width", "100%");
@@ -87,6 +87,27 @@
             return x;
         }
 
+        function getUserSpecifiedInterval() {
+            var interval = getUrlVars()['interval'];
+            if (interval && interval.indexOf('#') > -1) {
+                interval = interval.substr(0, interval.indexOf('#'));
+            }
+            return interval;
+        }
+
+        function getInterval() {
+            var userSpecifiedInterval = getUserSpecifiedInterval();
+            if (userSpecifiedInterval) {
+                if (userSpecifiedInterval >= 5000) {
+                    return userSpecifiedInterval;
+                } else {
+                    console.warn("'interval' not specified (correctly?) or value too small. default (%d) is used.", window.SLIDE_INTERVAL);
+                    return window.SLIDE_INTERVAL;
+                }
+            }
+            console.warn("'interval' not specified (correctly?). default (%d) is used.", window.SLIDE_INTERVAL);
+            return window.SLIDE_INTERVAL;
+        }
         function startSlides() {
             $('#slides').superslides({
                 hashchange: false,
@@ -206,6 +227,7 @@
             fetchUserImages(afterFetch);
         }
         $(function() {
+            window.SLIDE_INTERVAL = getInterval();
             start();
             window.setInterval(start, window.SERVER_PING_INTERVAL);
         });
