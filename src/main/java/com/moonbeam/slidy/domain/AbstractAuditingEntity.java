@@ -20,7 +20,7 @@ import javax.persistence.MappedSuperclass;
  */
 @MappedSuperclass
 @Audited
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, SaveToCloudinaryListener.class})
 public abstract class AbstractAuditingEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

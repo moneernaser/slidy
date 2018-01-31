@@ -6,6 +6,7 @@ export class Slide implements BaseEntity {
         public name?: string,
         public dataContentType?: string,
         public data?: any,
+        public url?: string,
         public showStartDate?: any,
         public showEndDate?: any,
         public user?: User,

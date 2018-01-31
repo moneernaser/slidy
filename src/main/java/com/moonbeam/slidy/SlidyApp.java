@@ -3,6 +3,7 @@ package com.moonbeam.slidy;
 import com.moonbeam.slidy.config.ApplicationProperties;
 import com.moonbeam.slidy.config.DefaultProfileUtil;
 
+import com.moonbeam.slidy.domain.AutowireHelper;
 import io.github.jhipster.config.JHipsterConstants;
 
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.boot.actuate.autoconfigure.*;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
@@ -80,5 +82,11 @@ public class SlidyApp {
             InetAddress.getLocalHost().getHostAddress(),
             env.getProperty("server.port"),
             env.getActiveProfiles());
+    }
+
+
+    @Bean
+    public AutowireHelper autowireHelper(){
+        return AutowireHelper.getInstance();
     }
 }

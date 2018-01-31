@@ -33,10 +33,7 @@
                 <td>{{slide.name}}</td>
                 <!--<td>{{slide.added_date | date:'medium'}}</td>-->
                 <td>
-                    <a *ngIf="slide.data" (click)="openFile(slide.dataContentType, slide.data)">
-                        <img [src]="'data:' + slide.dataContentType + ';base64,' + slide.data" style="max-height: 30px;" alt="slide image"/>
-                    </a>
-                    <span *ngIf="slide.data">{{slide.dataContentType}}, {{byteSize(slide.data)}}</span>
+                    <img [src]="slide.url" style="max-height: 30px;" alt="slide image"/>
                 </td>
                 <td>{{slide.showStartDate | date:'medium'}}</td>
                 <td>{{slide.showEndDate | date:'medium'}}</td>

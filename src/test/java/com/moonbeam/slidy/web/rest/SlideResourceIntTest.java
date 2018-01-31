@@ -2,6 +2,7 @@ package com.moonbeam.slidy.web.rest;
 
 import com.moonbeam.slidy.SlidyApp;
 
+import com.moonbeam.slidy.config.CloudinaryProperties;
 import com.moonbeam.slidy.domain.Slide;
 import com.moonbeam.slidy.repository.SlideRepository;
 import com.moonbeam.slidy.repository.UserRepository;
@@ -72,6 +73,9 @@ public class SlideResourceIntTest {
     private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
     @Autowired
+    private CloudinaryProperties cloudinaryProperties;
+
+    @Autowired
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
@@ -84,7 +88,7 @@ public class SlideResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final SlideResource slideResource = new SlideResource(slideRepository, userRepository);
+        final SlideResource slideResource = new SlideResource(slideRepository, userRepository, cloudinaryProperties);
         this.restSlideMockMvc = MockMvcBuilders.standaloneSetup(slideResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

@@ -26,6 +26,9 @@ public class Slide extends AbstractAuditingEntity implements Serializable {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "url")
+    private String url;
+
     @Lob
     @Column(name = "data")
     private byte[] data;
@@ -124,6 +127,14 @@ public class Slide extends AbstractAuditingEntity implements Serializable {
     public Slide user(User user) {
         this.user = user;
         return this;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void setUser(User user) {

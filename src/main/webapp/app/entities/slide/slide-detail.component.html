@@ -8,17 +8,11 @@
         <dd>
             <span>{{slide.name}}</span>
         </dd>
-        <!--<dt><span>Added Date</span></dt>-->
-        <!--<dd>-->
-            <!--<span>{{slide.added_date | date:'medium'}}</span>-->
-        <!--</dd>-->
-        <dt><span>Data</span></dt>
+          <dt><span>Data</span></dt>
         <dd>
-            <div *ngIf="slide.data">
-                <a (click)="openFile(slide.dataContentType, slide.data)">
-                    <img [src]="'data:' + slide.dataContentType + ';base64,' + slide.data" style="max-width: 100%;" alt="slide image"/>
-                </a>
-                {{slide.dataContentType}}, {{byteSize(slide.data)}}
+            <div >
+                    <img [src]="slide.url" style="max-width: 100%;" alt="slide image"/>
+
             </div>
         </dd>
         <dt><span>Show Start Date</span></dt>
@@ -29,14 +23,6 @@
         <dd>
             <span>{{slide.showEndDate | date:'medium'}}</span>
         </dd>
-        <!--<dt><span>Duration</span></dt>-->
-        <!--<dd>-->
-            <!--<span>{{slide.duration}}</span>-->
-        <!--</dd>-->
-        <!--<dt><span>User</span></dt>-->
-        <!--<dd>-->
-            <!--{{slide.user?.login}}-->
-        <!--</dd>-->
     </dl>
 
     <button type="submit"

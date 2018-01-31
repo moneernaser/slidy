@@ -1,6 +1,7 @@
 package com.moonbeam.slidy.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.moonbeam.slidy.config.CloudinaryProperties;
 import com.moonbeam.slidy.domain.Slide;
 
 import com.moonbeam.slidy.domain.User;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -34,10 +36,12 @@ public class SlideResource {
 
     private final SlideRepository slideRepository;
     private final UserRepository userRepository;
+    private final CloudinaryProperties cloudinaryProperties;
 
-    public SlideResource(SlideRepository slideRepository, UserRepository userRepository) {
+    public SlideResource(SlideRepository slideRepository, UserRepository userRepository, CloudinaryProperties cloudinaryProperties) {
         this.slideRepository = slideRepository;
         this.userRepository = userRepository;
+        this.cloudinaryProperties = cloudinaryProperties;
     }
 
     /**
@@ -49,7 +53,7 @@ public class SlideResource {
      */
     @PostMapping("/slides")
     @Timed
-    public ResponseEntity<Slide> createSlide(@RequestBody Slide slide) throws URISyntaxException {
+    public ResponseEntity<Slide> createSlide(@RequestBody Slide slide) throws URISyntaxException, IOException {
         log.debug("REST request to save Slide : {}", slide);
         if (slide.getId() != null) {
             throw new BadRequestAlertException("A new slide cannot already have an ID", ENTITY_NAME, "idexists");
@@ -65,6 +69,8 @@ public class SlideResource {
             .body(result);
     }
 
+
+
     /**
      * PUT  /slides : Updates an existing slide.
      *
@@ -76,7 +82,8 @@ public class SlideResource {
      */
     @PutMapping("/slides")
     @Timed
-    public ResponseEntity<Slide> updateSlide(@RequestBody Slide slide) throws URISyntaxException {
+    public ResponseEntity<Slide> updateSlide(@RequestBody Slide slide) throws URISyntaxException, IOException {
+        System.out.println(cloudinaryProperties);;
         log.debug("REST request to update Slide : {}", slide);
         if (slide.getId() == null) {
             return createSlide(slide);

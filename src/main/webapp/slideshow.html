@@ -74,7 +74,8 @@
 
         function img_create(item) {
             var x = document.createElement("IMG");
-            x.setAttribute("src", 'data:' + item.dataContentType + ';base64,' + item.data);
+           // x.setAttribute("src", 'data:' + item.dataContentType + ';base64,' + item.data);
+            x.setAttribute("src", item.url);
             x.setAttribute("height", "100%");
             x.setAttribute("width", "100%");
             x.setAttribute("id", item.id);

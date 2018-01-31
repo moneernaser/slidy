@@ -19,6 +19,11 @@ logging:
         com.moonbeam.slidy: DEBUG
         io.github.jhipster: DEBUG
 
+cloudinary:
+    api_key: ${CLOUDINARY_API_KEY}
+    cloud_name: ${CLOUDINARY_CLOUD_NAME}
+    api_secret: ${CLOUDINARY_API_SECRET}
+
 spring:
     profiles:
         active: dev
@@ -139,5 +144,3 @@ jhipster:
 # More documentation is available at:
 # http://www.jhipster.tech/common-application-properties/
 # ===================================================================
-
-application:

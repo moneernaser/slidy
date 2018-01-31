@@ -49,16 +49,6 @@ slides: Slide[];
         return this.dataUtils.byteSize(field);
     }
 
-    // gotoSlideshowPage() {
-    //     window.location.href = '/hellooo';
-    // }
-
-    // openFile(contentType, field) {
-    //     return this.dataUtils.openFile(contentType, field);
-    // }
-    // registerChangeInSlides() {
-    //     this.eventSubscriber = this.eventManager.subscribe('slideListModification', (response) => this.loadAll());
-    // }
 
     private onError(error) {
         this.jhiAlertService.error(error.message, null, null);

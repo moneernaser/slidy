@@ -24,6 +24,12 @@ management:
     health:
         mail:
             enabled: false # When using the MailService, configure an SMTP server and set this to true
+
+cloudinary:
+    api_key: #put value here
+    cloud_name: #put value here
+    api_secret: #put value here
+
 spring:
     application:
         name: slidy

@@ -1,0 +1,16 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "url",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20180130190832",
+    "dto": "no",
+    "service": "no",
+    "entityTableName": "slide",
+    "jpaMetamodelFiltering": false,
+    "pagination": "no"
+}
